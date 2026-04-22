@@ -1,0 +1,11 @@
+const { Router } = require("express");
+const { validate } = require("../../middlewares/validate");
+const { loginSchema, refreshSchema } = require("./auth.schemas");
+const authController = require("./auth.controller");
+
+const authRouter = Router();
+
+authRouter.post("/login", validate(loginSchema), authController.login);
+authRouter.post("/refresh", validate(refreshSchema), authController.refresh);
+
+module.exports = { authRouter };

@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    container_name: fondo-cano-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fondo_cano
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - fondo_cano_pg_data:/var/lib/postgresql/data
+      - ../db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fondo_cano"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ..
+      dockerfile: Containerfile
+    container_name: fondo-cano-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/fondo_cano
+      JWT_ACCESS_SECRET: replace_in_production
+      JWT_REFRESH_SECRET: replace_in_production
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+      CORS_ORIGIN: "*"
+      RATE_LIMIT_WINDOW_MS: 60000
+      RATE_LIMIT_MAX: 200
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  fondo_cano_pg_data:

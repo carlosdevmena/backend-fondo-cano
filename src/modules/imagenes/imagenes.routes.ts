@@ -1,0 +1,33 @@
+const { Router } = require("express");
+const imagenesController = require("./imagenes.controller");
+const { authenticate, authorize } = require("../../middlewares/auth");
+const { validate } = require("../../middlewares/validate");
+const { imagenPayloadSchema, imagenPatchSchema } = require("./imagenes.schemas");
+
+const imagenesRouter = Router();
+
+imagenesRouter.get("/obra/:obraId", imagenesController.listByObra);
+imagenesRouter.post(
+  "/",
+  authenticate,
+  authorize(["admin"]),
+  validate(imagenPayloadSchema),
+  imagenesController.create,
+);
+imagenesRouter.put(
+  "/:id",
+  authenticate,
+  authorize(["admin"]),
+  validate(imagenPayloadSchema),
+  imagenesController.patch,
+);
+imagenesRouter.patch(
+  "/:id",
+  authenticate,
+  authorize(["admin"]),
+  validate(imagenPatchSchema),
+  imagenesController.patch,
+);
+imagenesRouter.delete("/:id", authenticate, authorize(["admin"]), imagenesController.remove);
+
+module.exports = { imagenesRouter };

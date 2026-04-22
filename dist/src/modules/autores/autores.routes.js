@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const { Router } = require("express");
+const autoresController = require("./autores.controller");
+const { validate } = require("../../middlewares/validate");
+const { authenticate, authorize } = require("../../middlewares/auth");
+const { autorPayloadSchema, autorPatchSchema } = require("./autores.schemas");
+const autoresRouter = Router();
+autoresRouter.get("/", autoresController.list);
+autoresRouter.get("/:id", autoresController.getById);
+autoresRouter.post("/", authenticate, authorize(["admin"]), validate(autorPayloadSchema), autoresController.create);
+autoresRouter.put("/:id", authenticate, authorize(["admin"]), validate(autorPayloadSchema), autoresController.patch);
+autoresRouter.patch("/:id", authenticate, authorize(["admin"]), validate(autorPatchSchema), autoresController.patch);
+autoresRouter.delete("/:id", authenticate, authorize(["admin"]), autoresController.remove);
+module.exports = { autoresRouter };
