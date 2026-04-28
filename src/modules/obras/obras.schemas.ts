@@ -31,20 +31,45 @@ const obraPatchSchema = obraPayloadSchema.partial().refine(
   },
 );
 
-const obraQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  q: z.string().optional(),
-  autorId: optionalIntQuery,
-  tecnicaId: optionalIntQuery,
-  anioDesde: optionalIntQuery,
-  anioHasta: optionalIntQuery,
-  soloConImagen: z
-    .enum(["true", "false"])
-    .optional()
-    .transform((value) => (value ? value === "true" : undefined)),
-  sortBy: z.enum(["anio", "titulo", "fecha_registro"]).default("titulo"),
-  sortOrder: z.enum(["asc", "desc"]).default("asc"),
-});
+const obraQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+    q: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : v),
+      z.string().optional(),
+    ),
+    // Acepta camelCase y snake_case para compatibilidad con distintos clientes
+    autorId: optionalIntQuery,
+    autor_id: optionalIntQuery,
+    tecnicaId: optionalIntQuery,
+    tecnica_id: optionalIntQuery,
+    anioDesde: optionalIntQuery,
+    anio_desde: optionalIntQuery,
+    anioHasta: optionalIntQuery,
+    anio_hasta: optionalIntQuery,
+    soloConImagen: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : v),
+      z.enum(["true", "false"]).optional(),
+    ).transform((v) => (v === undefined ? undefined : v === "true")),
+    solo_con_imagen: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : v),
+      z.enum(["true", "false"]).optional(),
+    ).transform((v) => (v === undefined ? undefined : v === "true")),
+    sortBy: z.enum(["anio", "titulo", "fecha_registro"]).default("titulo"),
+    sortOrder: z.enum(["asc", "desc"]).default("asc"),
+  })
+  .transform((raw) => ({
+    page: raw.page,
+    limit: raw.limit,
+    q: raw.q,
+    autorId: raw.autorId ?? raw.autor_id,
+    tecnicaId: raw.tecnicaId ?? raw.tecnica_id,
+    anioDesde: raw.anioDesde ?? raw.anio_desde,
+    anioHasta: raw.anioHasta ?? raw.anio_hasta,
+    soloConImagen: raw.soloConImagen ?? raw.solo_con_imagen,
+    sortBy: raw.sortBy,
+    sortOrder: raw.sortOrder,
+  }));
 
 module.exports = { obraPayloadSchema, obraPatchSchema, obraQuerySchema };
