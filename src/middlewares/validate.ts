@@ -12,15 +12,23 @@ function validate(schema, target = "body") {
       });
     }
 
-    const current = req[target];
-    if (current && typeof current === "object" && !Array.isArray(current)) {
-      Object.keys(current).forEach((key) => {
-        delete current[key];
+    if (target === "query") {
+      // Express 5 define `req.query` con getter (solo lectura). Redefinimos en la instancia del request.
+      Object.defineProperty(req, "query", {
+        value: parsed.data,
+        writable: true,
+        configurable: true,
+        enumerable: true,
       });
-      Object.assign(current, parsed.data);
-    } else {
-      req[target] = parsed.data;
+      return next();
     }
+
+    if (target === "params") {
+      Object.assign(req.params, parsed.data);
+      return next();
+    }
+
+    req[target] = parsed.data;
     return next();
   };
 }

@@ -72,7 +72,36 @@ describe("API integration", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.total).toBe(1);
-    expect(obrasService.list).toHaveBeenCalled();
+    expect(obrasService.list).toHaveBeenCalledWith(
+      expect.objectContaining({
+        q: "Samuel",
+        tecnicaId: 1,
+        page: 1,
+        limit: 20,
+      }),
+    );
+  });
+
+  it("obras list accepts snake_case tecnica_id as filter", async () => {
+    obrasService.list.mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+    });
+
+    const response = await request(app).get(
+      "/api/v1/obras?tecnica_id=2&page=1&limit=20",
+    );
+
+    expect(response.status).toBe(200);
+    expect(obrasService.list).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tecnicaId: 2,
+        page: 1,
+        limit: 20,
+      }),
+    );
   });
 
   it("autores by id rejects invalid numeric param", async () => {

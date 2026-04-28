@@ -32,26 +32,34 @@ copy .env.example .env
 psql -U postgres -d fondo_cano -f "C:/Users/carlo/Downloads/dump_fondo_cano.sql"
 ```
 
-4) Ejecutar migraciones y seed
+4) Compilar TypeScript (necesario para `migrate`, `seed`, `create-admin` y `npm start` en producción)
+
+```bash
+npm run build
+```
+
+5) Ejecutar migraciones y seed
 
 ```bash
 npm run migrate
 npm run seed
 ```
 
-5) Crear o actualizar usuario admin
+En desarrollo puedes usar los mismos scripts vía TypeScript sin compilar: `npm run migrate:dev`, `npm run seed:dev`, `npm run create-admin:dev`.
+
+6) Crear o actualizar usuario admin
 
 ```bash
 npm run create-admin -- admin@fondo-cano.local TuPasswordSegura123
 ```
 
-6) Levantar API
+7) Levantar API
 
 ```bash
 npm run dev
 ```
 
-7) Compilar y ejecutar build de producción
+8) Compilar y ejecutar build de producción (otra vez si hubo cambios)
 
 ```bash
 npm run build
@@ -95,7 +103,13 @@ npm test
 - El código fuente vive en `src/**/*.ts`, `scripts/**/*.ts` y `tests/**/*.ts`.
 - `npm run dev` ejecuta la API con `tsx` en modo watch.
 - `npm run build` compila TypeScript a `dist/`.
-- `npm start` ejecuta `dist/server.js`.
+- `npm start` ejecuta `dist/src/server.js` (salida real de `tsc` con la estructura actual del repo).
+
+## Despliegue en Render / PaaS (Node)
+
+- **Build**: `npm install && npm run build` (debe existir `dist/` antes de `npm start`).
+- **Start**: `npm start` (equivale a `node dist/src/server.js`).
+- **Migraciones** (opcional, una vez por despliegue o cuando cambien SQL): en el mismo entorno, tras el build, `npm run migrate`. En local sin compilar puedes usar `npm run migrate:dev`.
 
 ## Despliegue con Podman
 

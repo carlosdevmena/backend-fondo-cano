@@ -10,6 +10,10 @@ function mapOrderBy(sortBy) {
 }
 
 async function listObras(filters) {
+  const page = Math.max(1, Math.floor(Number(filters.page)) || 1);
+  const limit = Math.min(100, Math.max(1, Math.floor(Number(filters.limit)) || 20));
+  const offset = (page - 1) * limit;
+
   const values = [];
   const where = [];
   let idx = 1;
@@ -45,7 +49,6 @@ async function listObras(filters) {
   }
 
   const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
-  const offset = (filters.page - 1) * filters.limit;
   const orderBy = mapOrderBy(filters.sortBy);
   const order = filters.sortOrder === "desc" ? "DESC" : "ASC";
 
@@ -75,14 +78,14 @@ async function listObras(filters) {
     LIMIT $${idx} OFFSET $${idx + 1}
   `;
 
-  const dataValues = [...values, filters.limit, offset];
+  const dataValues = [...values, limit, offset];
   const { rows } = await pool.query(dataQuery, dataValues);
 
   return {
     data: rows,
     total: countRows[0].total,
-    page: filters.page,
-    limit: filters.limit,
+    page,
+    limit,
   };
 }
 
