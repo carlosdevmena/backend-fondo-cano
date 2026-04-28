@@ -6,6 +6,6 @@ const loginSchema = z.object({
     password: z.string().min(8).max(120),
 });
 const refreshSchema = z.object({
-    refreshToken: z.string().min(20),
+    refreshToken: z.string().min(20).optional(),
 });
 module.exports = { loginSchema, refreshSchema };

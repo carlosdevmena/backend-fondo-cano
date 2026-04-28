@@ -3,12 +3,13 @@ const obrasController = require("./obras.controller");
 const { validate } = require("../../middlewares/validate");
 const { authenticate, authorize } = require("../../middlewares/auth");
 const { obraPayloadSchema, obraPatchSchema, obraQuerySchema } = require("./obras.schemas");
+const { obraKeyParamSchema } = require("../../schemas/params.schemas");
 
 const obrasRouter = Router();
 
 obrasRouter.get("/", validate(obraQuerySchema, "query"), obrasController.list);
 obrasRouter.get("/facets", obrasController.facets);
-obrasRouter.get("/:id", obrasController.getById);
+obrasRouter.get("/:id", validate(obraKeyParamSchema, "params"), obrasController.getById);
 
 obrasRouter.post(
   "/",
@@ -21,6 +22,7 @@ obrasRouter.put(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(obraKeyParamSchema, "params"),
   validate(obraPayloadSchema),
   obrasController.patch,
 );
@@ -28,9 +30,16 @@ obrasRouter.patch(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(obraKeyParamSchema, "params"),
   validate(obraPatchSchema),
   obrasController.patch,
 );
-obrasRouter.delete("/:id", authenticate, authorize(["admin"]), obrasController.remove);
+obrasRouter.delete(
+  "/:id",
+  authenticate,
+  authorize(["admin"]),
+  validate(obraKeyParamSchema, "params"),
+  obrasController.remove,
+);
 
 module.exports = { obrasRouter };

@@ -3,10 +3,15 @@ const imagenesController = require("./imagenes.controller");
 const { authenticate, authorize } = require("../../middlewares/auth");
 const { validate } = require("../../middlewares/validate");
 const { imagenPayloadSchema, imagenPatchSchema } = require("./imagenes.schemas");
+const { idParamSchema, obraIdParamSchema } = require("../../schemas/params.schemas");
 
 const imagenesRouter = Router();
 
-imagenesRouter.get("/obra/:obraId", imagenesController.listByObra);
+imagenesRouter.get(
+  "/obra/:obraId",
+  validate(obraIdParamSchema, "params"),
+  imagenesController.listByObra,
+);
 imagenesRouter.post(
   "/",
   authenticate,
@@ -18,6 +23,7 @@ imagenesRouter.put(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(idParamSchema, "params"),
   validate(imagenPayloadSchema),
   imagenesController.patch,
 );
@@ -25,9 +31,16 @@ imagenesRouter.patch(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(idParamSchema, "params"),
   validate(imagenPatchSchema),
   imagenesController.patch,
 );
-imagenesRouter.delete("/:id", authenticate, authorize(["admin"]), imagenesController.remove);
+imagenesRouter.delete(
+  "/:id",
+  authenticate,
+  authorize(["admin"]),
+  validate(idParamSchema, "params"),
+  imagenesController.remove,
+);
 
 module.exports = { imagenesRouter };

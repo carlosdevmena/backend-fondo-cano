@@ -1,5 +1,12 @@
 const { z } = require("zod");
 
+const optionalIntQuery = z.preprocess((value) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  return value;
+}, z.coerce.number().int().optional());
+
 const obraPayloadSchema = z.object({
   id: z.string().min(1).max(20),
   titulo: z.string().min(1),
@@ -28,10 +35,10 @@ const obraQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   q: z.string().optional(),
-  autorId: z.coerce.number().int().optional(),
-  tecnicaId: z.coerce.number().int().optional(),
-  anioDesde: z.coerce.number().int().optional(),
-  anioHasta: z.coerce.number().int().optional(),
+  autorId: optionalIntQuery,
+  tecnicaId: optionalIntQuery,
+  anioDesde: optionalIntQuery,
+  anioHasta: optionalIntQuery,
   soloConImagen: z
     .enum(["true", "false"])
     .optional()

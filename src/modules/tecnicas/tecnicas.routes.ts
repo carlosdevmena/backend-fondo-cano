@@ -3,11 +3,12 @@ const tecnicasController = require("./tecnicas.controller");
 const { validate } = require("../../middlewares/validate");
 const { authenticate, authorize } = require("../../middlewares/auth");
 const { tecnicaPayloadSchema, tecnicaPatchSchema } = require("./tecnicas.schemas");
+const { idParamSchema } = require("../../schemas/params.schemas");
 
 const tecnicasRouter = Router();
 
 tecnicasRouter.get("/", tecnicasController.list);
-tecnicasRouter.get("/:id", tecnicasController.getById);
+tecnicasRouter.get("/:id", validate(idParamSchema, "params"), tecnicasController.getById);
 tecnicasRouter.post(
   "/",
   authenticate,
@@ -19,6 +20,7 @@ tecnicasRouter.put(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(idParamSchema, "params"),
   validate(tecnicaPayloadSchema),
   tecnicasController.patch,
 );
@@ -26,9 +28,16 @@ tecnicasRouter.patch(
   "/:id",
   authenticate,
   authorize(["admin"]),
+  validate(idParamSchema, "params"),
   validate(tecnicaPatchSchema),
   tecnicasController.patch,
 );
-tecnicasRouter.delete("/:id", authenticate, authorize(["admin"]), tecnicasController.remove);
+tecnicasRouter.delete(
+  "/:id",
+  authenticate,
+  authorize(["admin"]),
+  validate(idParamSchema, "params"),
+  tecnicasController.remove,
+);
 
 module.exports = { tecnicasRouter };
